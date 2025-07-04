@@ -196,18 +196,22 @@ DelayBox.FocusLost:Connect(function()
     end
 end)
 
--- 🔁 AUTO TELEPORT
+-- 🔁 AUTO TELEPORT (Perbaikan Final)
+local lastTeleport = 0
+
 RunService.Heartbeat:Connect(function()
     if teleportEnabled and saved.point1 and saved.point2 then
         local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
         if root then
+            local now = tick()
             local targetPos = currentTarget == 1 and saved.point1 or saved.point2
             local target = Vector3.new(targetPos.x, targetPos.y, targetPos.z)
+
             if (root.Position - target).Magnitude > 5 then
-                root.CFrame = root.CFrame:Lerp(CFrame.new(target), 0.1)
-            else
+                root.CFrame = root.CFrame:Lerp(CFrame.new(target), 0.15)
+            elseif now - lastTeleport >= saved.delay then
                 currentTarget = currentTarget == 1 and 2 or 1
-                task.wait(saved.delay)
+                lastTeleport = now
             end
         end
     end
