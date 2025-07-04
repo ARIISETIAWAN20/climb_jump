@@ -196,7 +196,7 @@ DelayBox.FocusLost:Connect(function()
     end
 end)
 
--- 🔁 AUTO TELEPORT (Metode Pivot - seperti Arii)
+-- 🔁 AUTO TELEPORT (Metode Pivot + Anti Tembus)
 local function teleportTo(pos)
     local char = LP.Character or LP.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
@@ -205,8 +205,23 @@ local function teleportTo(pos)
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
     task.wait(0.05)
+
+    -- 🧱 Blok Tipis Anti Tembus
+    local pad = Instance.new("Part")
+    pad.Anchored = true
+    pad.CanCollide = true
+    pad.Size = Vector3.new(6, 1, 6)
+    pad.CFrame = CFrame.new(pos.x, pos.y + 1.5, pos.z)
+    pad.Transparency = 0.7
+    pad.Material = Enum.Material.ForceField
+    pad.BrickColor = BrickColor.Black()
+    pad.Name = "TeleportPad"
+    pad.Parent = workspace
+    game:GetService("Debris"):AddItem(pad, 4)
+
     char:PivotTo(CFrame.new(pos.x, pos.y + 3, pos.z))
     task.wait(0.05)
+
     hrp.Anchored = false
     if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Running) end
 end
