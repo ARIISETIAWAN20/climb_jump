@@ -1,9 +1,10 @@
--- ✅ CLIMB AND JUMP | Final Version | All Features Unlocked | Delta Mobile Safe
+-- ✅ CLIMB AND JUMP | ARII FUSION VERSION | Delta Mobile Safe
 
 if game.PlaceId ~= 123921593837160 then
-    return warn("[CLIMB AND JUMP] Script hanya berjalan di Climb and Jump Tower (Tokyo Tower).")
+    return warn("[CLIMB AND JUMP] Hanya untuk Tokyo Tower.")
 end
 
+-- 🔧 Service
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
@@ -13,7 +14,7 @@ local PlayerGui = LP:WaitForChild("PlayerGui")
 
 -- 🔐 HWID LOCK (bypass untuk supa_loi dan Devrenzx)
 local allowedHWID = {
-    ["ABC123DEF456"] = true -- ❗ Ganti ini dengan HWID kamu
+    ["ABC123DEF456"] = true -- Ganti HWID kamu di sini
 }
 local bypassName = {
     ["supa_loi"] = true,
@@ -30,21 +31,21 @@ end
 if not bypassName[LP.Name] then
     local hwid = getHWID()
     if not allowedHWID[hwid] then
-        return LP:Kick("HWID tidak terdaftar. Hubungi pembuat script.")
+        return LP:Kick("HWID tidak terdaftar.")
     end
 end
 
--- 🔍 DEEP SCAN SEDERHANA
+-- 🔍 Deep Scan
 local suspicious = {"admin","mod","staff","dev","helper"}
-for _, plr in pairs(Players:GetPlayers()) do
-    for _, word in pairs(suspicious) do
-        if plr.Name:lower():find(word) then
-            return LP:Kick("Admin/Staff terdeteksi dalam server.\n("..plr.Name..")")
+for _, p in pairs(Players:GetPlayers()) do
+    for _, w in pairs(suspicious) do
+        if p.Name:lower():find(w) then
+            return LP:Kick("Staff terdeteksi: "..p.Name)
         end
     end
 end
 
--- 🚫 BLACKLIST
+-- 🚫 Blacklist Staff
 local blacklist = {
     ["mach383"] = true, ["ixNazzz"] = true, ["Evgeniy444444"] = true,
     ["legendxlenn"] = true, ["VicSimon8"] = true, ["Woodrowlvan_8"] = true,
@@ -53,21 +54,21 @@ local blacklist = {
     ["AidenKaur"] = true, ["RBMAforMBTC"] = true, ["BlueBirdBarry"] = true
 }
 if blacklist[LP.Name] then
-    return LP:Kick("Script tidak tersedia untuk staff/admin.")
+    return LP:Kick("Script tidak tersedia untuk staff.")
 end
 
--- 🛡️ ANTI KICK
+-- 🛡️ Anti Kick
 local mt = getrawmetatable(game)
 setreadonly(mt, false)
 local old = mt.__namecall
 mt.__namecall = newcclosure(function(self, ...)
     if tostring(self) == "Kick" or getnamecallmethod() == "Kick" then
-        return warn("[AntiKick] Diblok.")
+        return warn("[AntiKick] Diblokir.")
     end
     return old(self, ...)
 end)
 
--- 💤 ANTI AFK
+-- 💤 Anti AFK
 for _,v in ipairs(getconnections(LP.Idled)) do v:Disable() end
 task.spawn(function()
     while task.wait(300) do
@@ -77,10 +78,10 @@ task.spawn(function()
     end
 end)
 
--- 💾 LOAD POINT & DELAY
+-- 💾 File Save
 local filename = "Climb_point.json"
 if not isfile(filename) then
-    writefile(filename, HttpService:JSONEncode({point1 = nil, point2 = nil, delay = 8}))
+    writefile(filename, HttpService:JSONEncode({point1=nil, point2=nil, delay=8}))
 end
 local saved = HttpService:JSONDecode(readfile(filename))
 if typeof(saved.delay) ~= "number" or saved.delay < 1 or saved.delay > 10 then
@@ -88,18 +89,14 @@ if typeof(saved.delay) ~= "number" or saved.delay < 1 or saved.delay > 10 then
     writefile(filename, HttpService:JSONEncode(saved))
 end
 
-local teleportEnabled = false
-local minimized = false
-local currentTarget = 1
-
 -- 📦 UI
 local Gui = Instance.new("ScreenGui", PlayerGui)
-Gui.Name = "ClimbAndJumpUI"
+Gui.Name = "CLIMB_JUMP_UI"
 Gui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame", Gui)
-Frame.Size = UDim2.new(0, 180, 0, 190)
-Frame.Position = UDim2.new(0, 10, 0.6, -95)
+Frame.Size = UDim2.new(0, 170, 0, 170)
+Frame.Position = UDim2.new(0, 10, 0.5, -85)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 50)
 Frame.Active = true
 Frame.Draggable = true
@@ -119,37 +116,52 @@ MinBtn.Position = UDim2.new(1, -30, 0, 0)
 MinBtn.BackgroundColor3 = Color3.fromRGB(100, 80, 180)
 MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local TeleportBtn = Instance.new("TextButton", Frame)
-TeleportBtn.Text = "🔁 Auto Teleport [OFF]"
-TeleportBtn.Size = UDim2.new(1, -16, 0, 26)
-TeleportBtn.Position = UDim2.new(0, 8, 0, 32)
-TeleportBtn.BackgroundColor3 = Color3.fromRGB(50, 90, 160)
-TeleportBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+local function makeBtn(txt, y, color)
+    local btn = Instance.new("TextButton", Frame)
+    btn.Size = UDim2.new(1, -16, 0, 26)
+    btn.Position = UDim2.new(0, 8, 0, y)
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 13
+    btn.Text = txt
+    return btn
+end
 
-local SetPoint1Btn = Instance.new("TextButton", Frame)
-SetPoint1Btn.Text = "📍 Set Point 1"
-SetPoint1Btn.Size = UDim2.new(1, -16, 0, 26)
-SetPoint1Btn.Position = UDim2.new(0, 8, 0, 62)
-SetPoint1Btn.BackgroundColor3 = Color3.fromRGB(100, 60, 180)
-SetPoint1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-local SetPoint2Btn = Instance.new("TextButton", Frame)
-SetPoint2Btn.Text = "📍 Set Point 2"
-SetPoint2Btn.Size = UDim2.new(1, -16, 0, 26)
-SetPoint2Btn.Position = UDim2.new(0, 8, 0, 92)
-SetPoint2Btn.BackgroundColor3 = Color3.fromRGB(140, 60, 200)
-SetPoint2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-
+local AutoBtn = makeBtn("🔁 Auto Teleport [OFF]", 32, Color3.fromRGB(50, 90, 160))
+local Point1Btn = makeBtn("📍 Set Point 1", 62, Color3.fromRGB(100, 60, 180))
+local Point2Btn = makeBtn("📍 Set Point 2", 92, Color3.fromRGB(140, 60, 200))
 local DelayBox = Instance.new("TextBox", Frame)
-DelayBox.PlaceholderText = "⏱ Delay (1-10)"
-DelayBox.Text = tostring(saved.delay)
 DelayBox.Size = UDim2.new(1, -16, 0, 26)
 DelayBox.Position = UDim2.new(0, 8, 0, 122)
+DelayBox.PlaceholderText = "⏱ Delay (1-10)"
+DelayBox.Text = tostring(saved.delay)
+DelayBox.ClearTextOnFocus = false
 DelayBox.BackgroundColor3 = Color3.fromRGB(70, 70, 120)
 DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-DelayBox.ClearTextOnFocus = false
+DelayBox.Parent = Frame
 
--- 📦 UI Logic
+-- 🧠 Teleport Logic
+local teleporting = false
+local currentTarget = 1
+local function teleportTo(point)
+    if point then
+        local char = LP.Character or LP.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.Anchored = true
+        hrp.Velocity = Vector3.zero
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Physics) end
+        task.wait(0.05)
+        char:PivotTo(CFrame.new(point.x, point.y + 3, point.z))
+        task.wait(0.05)
+        hrp.Anchored = false
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Running) end
+    end
+end
+
+-- 🔘 Button Events
+local minimized = false
 MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     for _,v in pairs(Frame:GetChildren()) do
@@ -157,33 +169,33 @@ MinBtn.MouseButton1Click:Connect(function()
             if v ~= MinBtn then v.Visible = not minimized end
         end
     end
-    Frame.Size = minimized and UDim2.new(0, 140, 0, 26) or UDim2.new(0, 180, 0, 190)
+    Frame.Size = minimized and UDim2.new(0, 140, 0, 26) or UDim2.new(0, 170, 0, 170)
 end)
 
-SetPoint1Btn.MouseButton1Click:Connect(function()
+AutoBtn.MouseButton1Click:Connect(function()
+    teleporting = not teleporting
+    AutoBtn.Text = teleporting and "🔁 Auto Teleport [ON]" or "🔁 Auto Teleport [OFF]"
+    AutoBtn.BackgroundColor3 = teleporting and Color3.fromRGB(0,200,0) or Color3.fromRGB(50,90,160)
+end)
+
+Point1Btn.MouseButton1Click:Connect(function()
     local pos = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and LP.Character.HumanoidRootPart.Position
     if pos then
         saved.point1 = {x=pos.X, y=pos.Y, z=pos.Z}
         writefile(filename, HttpService:JSONEncode(saved))
-        SetPoint1Btn.Text = "✅ Point 1 Saved!"
-        task.delay(2, function() SetPoint1Btn.Text = "📍 Set Point 1" end)
+        Point1Btn.Text = "✅ Point 1 Saved!"
+        task.delay(2, function() Point1Btn.Text = "📍 Set Point 1" end)
     end
 end)
 
-SetPoint2Btn.MouseButton1Click:Connect(function()
+Point2Btn.MouseButton1Click:Connect(function()
     local pos = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and LP.Character.HumanoidRootPart.Position
     if pos then
         saved.point2 = {x=pos.X, y=pos.Y, z=pos.Z}
         writefile(filename, HttpService:JSONEncode(saved))
-        SetPoint2Btn.Text = "✅ Point 2 Saved!"
-        task.delay(2, function() SetPoint2Btn.Text = "📍 Set Point 2" end)
+        Point2Btn.Text = "✅ Point 2 Saved!"
+        task.delay(2, function() Point2Btn.Text = "📍 Set Point 2" end)
     end
-end)
-
-TeleportBtn.MouseButton1Click:Connect(function()
-    teleportEnabled = not teleportEnabled
-    TeleportBtn.Text = teleportEnabled and "🔁 Auto Teleport [ON]" or "🔁 Auto Teleport [OFF]"
-    TeleportBtn.BackgroundColor3 = teleportEnabled and Color3.fromRGB(0,200,0) or Color3.fromRGB(50,90,160)
 end)
 
 DelayBox.FocusLost:Connect(function()
@@ -196,26 +208,10 @@ DelayBox.FocusLost:Connect(function()
     end
 end)
 
--- 🔁 TELEPORT SEPERTI ARII
-local function teleportTo(point)
-    if point then
-        local char = LP.Character or LP.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-        hrp.Anchored = true
-        hrp.Velocity = Vector3.zero
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
-        task.wait(0.05)
-        char:PivotTo(CFrame.new(point.x, point.y + 3, point.z))
-        task.wait(0.05)
-        hrp.Anchored = false
-        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Running) end
-    end
-end
-
+-- ⏱️ Auto Teleport Loop
 task.spawn(function()
     while task.wait(1) do
-        if teleportEnabled and saved.point1 and saved.point2 then
+        if teleporting and saved.point1 and saved.point2 then
             teleportTo(currentTarget == 1 and saved.point1 or saved.point2)
             currentTarget = currentTarget == 1 and 2 or 1
             task.wait(saved.delay)
