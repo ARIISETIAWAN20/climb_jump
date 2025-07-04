@@ -196,23 +196,28 @@ DelayBox.FocusLost:Connect(function()
     end
 end)
 
--- 🔁 AUTO TELEPORT (Perbaikan Final)
-local lastTeleport = 0
+-- 🔁 AUTO TELEPORT (Metode Pivot - seperti Arii)
+local function teleportTo(pos)
+    local char = LP.Character or LP.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    hrp.Anchored = true
+    hrp.Velocity = Vector3.zero
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
+    task.wait(0.05)
+    char:PivotTo(CFrame.new(pos.x, pos.y + 3, pos.z))
+    task.wait(0.05)
+    hrp.Anchored = false
+    if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Running) end
+end
 
-RunService.Heartbeat:Connect(function()
-    if teleportEnabled and saved.point1 and saved.point2 then
-        local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            local now = tick()
-            local targetPos = currentTarget == 1 and saved.point1 or saved.point2
-            local target = Vector3.new(targetPos.x, targetPos.y, targetPos.z)
-
-            if (root.Position - target).Magnitude > 5 then
-                root.CFrame = root.CFrame:Lerp(CFrame.new(target), 0.15)
-            elseif now - lastTeleport >= saved.delay then
-                currentTarget = currentTarget == 1 and 2 or 1
-                lastTeleport = now
-            end
+task.spawn(function()
+    while task.wait(1) do
+        if teleportEnabled and saved.point1 and saved.point2 then
+            local target = currentTarget == 1 and saved.point1 or saved.point2
+            teleportTo(target)
+            currentTarget = currentTarget == 1 and 2 or 1
+            task.wait(saved.delay)
         end
     end
 end)
