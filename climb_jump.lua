@@ -1,4 +1,72 @@
--- ✅ CLIMB AND JUMP | Final Version | Tanpa Anti Clip Velocity
+-- ✅ Auto Kick on Suspicious Chat + HWID Lock + CLIMB AND JUMP UI (Delta Mobile Safe)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+-- ✅ Kata-kata yang memicu Auto Kick
+local bannedWords = {
+    "hacker", "hacking", "cheat", "cheater", "cheating", "exploiter", "exploit", "exploiting",
+    "esp", "aimbot", "fly", "noclip", "speedhack", "teleport", "kecurangan", "glitch",
+    "mod", "modded", "injector", "btools", "dll", "ban", "report", "reported", "banned", "riport",
+    "hack", "inject", "executed", "executor", "dex", "silent aim", "aimlock", "silent",
+    "delta", "synapse", "script", "auto farm", "auto win", "auto coin", "triggerbot"
+}
+
+local function containsBannedWords(message)
+    message = string.lower(message)
+    for _, word in ipairs(bannedWords) do
+        if message:find(word) then
+            return true
+        end
+    end
+    return false
+end
+
+local function kickNow(reason)
+    warn("[AutoKick] Kata terlarang terdeteksi, keluar dari game...")
+    task.defer(function()
+        pcall(function()
+            game:Shutdown()
+        end)
+    end)
+end
+
+local function listenToPlayerChat(player)
+    if player and player ~= LocalPlayer then
+        player.Chatted:Connect(function(msg)
+            if containsBannedWords(msg) then
+                kickNow("Chat mencurigakan: " .. msg)
+            end
+        end)
+    end
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    listenToPlayerChat(player)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    listenToPlayerChat(player)
+end)
+
+local function hookBubbleChat()
+    local ChatService = game:GetService("TextChatService")
+    if ChatService then
+        ChatService.OnIncomingMessage = function(message)
+            if message and message.Text then
+                if message.TextSource ~= LocalPlayer then
+                    if containsBannedWords(message.Text) then
+                        kickNow("Detected bubble chat: " .. message.Text)
+                    end
+                end
+            end
+            return message
+        end
+    end
+end
 
 -- ⚠️ HWID Lock - pengecualian nama "supa_loi" & "Devrenzx"
 local allowedUsers = {
@@ -6,7 +74,6 @@ local allowedUsers = {
     ["Devrenzx"] = true
 }
 
-local Players = game:GetService("Players")
 local user = Players.LocalPlayer
 local hwid = tostring(rconsoleprint or print)
 local unique_id = tostring(hwid):match("function: (.+)") or "unknown"
@@ -17,7 +84,7 @@ local allowedHWIDs = {
 }
 
 if not allowedUsers[user.Name] and not allowedHWIDs[unique_id] then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
+    StarterGui:SetCore("SendNotification", {
         Title = "HWID LOCK", Text = "Perangkat tidak terdaftar!", Duration = 5
     })
     wait(2)
@@ -31,10 +98,6 @@ if not (writefile and readfile and isfile) then
     getgenv().readfile = function() return "{}" end
     getgenv().isfile = function() return false end
 end
-
-local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
 
 local filename = "teleport_points.json"
 local teleportPoints = {point1 = nil, point2 = nil}
@@ -175,14 +238,14 @@ local function createButton(text, y, callback)
     return b
 end
 
-createButton("🚀 Teleport to Point 1", 5, function() teleportTo(teleportPoints.point1) end)
-createButton("🚀 Teleport to Point 2", 28, function() teleportTo(teleportPoints.point2) end)
-createButton("📌 Set Point 1", 51, function()
+createButton("\ud83d\ude80 Teleport to Point 1", 5, function() teleportTo(teleportPoints.point1) end)
+createButton("\ud83d\ude80 Teleport to Point 2", 28, function() teleportTo(teleportPoints.point2) end)
+createButton("\ud83d\udccc Set Point 1", 51, function()
     local hrp = getHRP()
     teleportPoints.point1 = {x=hrp.Position.X, y=hrp.Position.Y, z=hrp.Position.Z}
     savePoints()
 end)
-createButton("📌 Set Point 2", 74, function()
+createButton("\ud83d\udccc Set Point 2", 74, function()
     local hrp = getHRP()
     teleportPoints.point2 = {x=hrp.Position.X, y=hrp.Position.Y, z=hrp.Position.Z}
     savePoints()
@@ -204,14 +267,14 @@ delayBox.FocusLost:Connect(function()
     if val and val > 0 then delayTime = val end
 end)
 
-local autoBtn = createButton("▶️ Start Auto Teleport", 120, function()
+local autoBtn = createButton("\u25b6\ufe0f Start Auto Teleport", 120, function()
     autoTeleport = not autoTeleport
-    autoBtn.Text = autoTeleport and "⏹ Stop Auto Teleport" or "▶️ Start Auto Teleport"
+    autoBtn.Text = autoTeleport and "\u23f9 Stop Auto Teleport" or "\u25b6\ufe0f Start Auto Teleport"
 end)
 
-createButton("❌ OFF Auto Teleport", 143, function()
+createButton("\u274c OFF Auto Teleport", 143, function()
     autoTeleport = false
-    autoBtn.Text = "▶️ Start Auto Teleport"
+    autoBtn.Text = "\u25b6\ufe0f Start Auto Teleport"
 end)
 
 local credit = Instance.new("TextLabel")
@@ -221,7 +284,7 @@ credit.BackgroundTransparency = 1
 credit.TextColor3 = Color3.fromRGB(200, 180, 255)
 credit.Font = Enum.Font.SourceSansItalic
 credit.TextSize = 11
-credit.Text = "By Ari"
+credit.Text = 
 credit.Parent = MainFrame
 
 spawn(function()
@@ -254,3 +317,6 @@ user.CharacterAdded:Connect(function(char)
         end
     end)
 end)
+
+pcall(hookBubbleChat)
+print("[AutoKick] Aktif dan memantau chat...")
