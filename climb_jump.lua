@@ -1,4 +1,9 @@
--- ✅ CLIMB AND JUMP | Final Version | Tanpa Anti Clip Velocity
+-- ✅ CLIMB AND JUMP | Final Version | Versi Lengkap
+
+-- ❗ Game Lock
+if game.PlaceId ~= 123921593837160 then
+    return warn("[CLIMB AND JUMP] Script hanya berjalan di Climb and Jump Tower - Summer Event (Fishing)")
+end
 
 -- ⚠️ HWID Lock - pengecualian nama "supa_loi" & "Devrenzx"
 local allowedUsers = {
@@ -118,7 +123,7 @@ local function teleportTo(point)
     end
 end
 
--- ✅ UI
+-- ✅ UI Lengkap
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TeleportGUI"
 pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
@@ -224,6 +229,7 @@ credit.TextSize = 11
 credit.Text = "By Ari"
 credit.Parent = MainFrame
 
+-- ✅ Auto Teleport Loop
 spawn(function()
     while true do wait(1)
         if autoTeleport and teleportPoints.point1 and teleportPoints.point2 then
@@ -234,11 +240,13 @@ spawn(function()
     end
 end)
 
+-- ✅ Anti AFK
 for _,v in pairs(getconnections(user.Idled)) do v:Disable() end
 
+-- ✅ Load Saved Points
 loadPoints()
 
--- ✅ Minimize Logic
+-- ✅ Minimize Toggle
 local minimized = false
 minimizeButton.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -247,6 +255,7 @@ minimizeButton.MouseButton1Click:Connect(function()
     MainFrame.Size = minimized and UDim2.new(0, 160, 0, 22) or UDim2.new(0, 160, 0, 200)
 end)
 
+-- ✅ Fix Physic State Saat Character Spawn
 user.CharacterAdded:Connect(function(char)
     char:WaitForChild("Humanoid").StateChanged:Connect(function(_, newState)
         if newState == Enum.HumanoidStateType.Physics then
