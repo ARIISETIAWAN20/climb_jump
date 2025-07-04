@@ -196,26 +196,27 @@ DelayBox.FocusLost:Connect(function()
     end
 end)
 
--- 🔁 AUTO TELEPORT (Metode Pivot - seperti Arii)
-local function teleportTo(pos)
-    local char = LP.Character or LP.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.Anchored = true
-    hrp.Velocity = Vector3.zero
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
-    task.wait(0.05)
-    char:PivotTo(CFrame.new(pos.x, pos.y + 3, pos.z))
-    task.wait(0.05)
-    hrp.Anchored = false
-    if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Running) end
+-- 🔁 TELEPORT SEPERTI ARII
+local function teleportTo(point)
+    if point then
+        local char = LP.Character or LP.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.Anchored = true
+        hrp.Velocity = Vector3.zero
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
+        task.wait(0.05)
+        char:PivotTo(CFrame.new(point.x, point.y + 3, point.z))
+        task.wait(0.05)
+        hrp.Anchored = false
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Running) end
+    end
 end
 
 task.spawn(function()
     while task.wait(1) do
         if teleportEnabled and saved.point1 and saved.point2 then
-            local target = currentTarget == 1 and saved.point1 or saved.point2
-            teleportTo(target)
+            teleportTo(currentTarget == 1 and saved.point1 or saved.point2)
             currentTarget = currentTarget == 1 and 2 or 1
             task.wait(saved.delay)
         end
